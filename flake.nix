@@ -23,31 +23,11 @@
         fixedVersions = builtins.map (builtins.mapAttrs (name: value: if name == "version" then (escapeVersion value) else value)) versions;
         versionsForSystem = builtins.filter (v: v.system == system) fixedVersions;
         mkBunApp = v: flake-utils.lib.mkApp { drv = mkBun v; };
-        versionMap = builtins.listToAttrs (map (v: {name = v.version; value = mkBunApp v;}) versionsForSystem);
+        mapViaVersion = f: vs: builtins.listToAttrs (map (v: {name = v.version; value = f v;}) vs);
+
       in {
-        apps = versionMap;
+        apps = mapViaVersion mkBunApp versionsForSystem;
+        packages = mapViaVersion mkBun versionsForSystem;
       }
-        # for each thing in $versions which supports this system,
-        #   get the version, apps."${version}" = flake-utils.lib.mkApp { drv = mkBun {} }
     );
-    # flake-utils.lib.eachDefaultSystem (system: let
-    #   pkgs = nixpkgs.legacyPackages.${system};
-    #   bun = mkBun {
-    #     version = "v0.1.5";
-    #     dsym = false;
-    #     baseline = false;
-    #     profile = false;
-    #     sha256 = "1gwmxw0a2vdvcsr55n9mj5n90lh339jhcij4pa25by3s8qhc9x1k";
-    #   };
-    # in rec {
-    #   packages = {
-    #     bun = bun;
-    #   };
-    #   apps.bun = flake-utils.lib.mkApp {
-    #     drv = bun;
-    #   };
-    #   apps.default = apps.bun;
-    #   # apps.default = bun;
-    #   # defaultApp = bun;
-    # });
 }
