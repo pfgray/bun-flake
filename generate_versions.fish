@@ -1,5 +1,10 @@
 #!/usr/bin/env fish
 
+if test -z $BUN_VERSIONS_TOKEN
+  echo "env variable BUN_VERSIONS_TOKEN is needed for this script"
+  exit 1
+end
+
 set VERSIONS_RESP (curl \
     -s \
     -H "Accept: application/vnd.github+json" \
@@ -14,7 +19,6 @@ set VERSIONS_RESP (curl \
 set VERSIONS (echo $VERSIONS_RESP | jq -c ".[] | {tag: .tag_name, asset: (.assets[] | {name, browser_download_url})}")
 
 # set VERSIONS "0.1.6" "0.1.5" "0.1.4" "0.1.3" "0.1.2" "0.1.1" "0.0.83" "0.0.81" "0.0.79" "0.0.78" 
-
 
 rm versions.nix
 echo "[" >> versions.nix
